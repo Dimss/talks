@@ -1,3 +1,4 @@
+######## 20.sh ########
 # create virtual block device
 losetup -fP "${LOOPBACK_DIR}/${LOOPBACK_FILE}"
 losetup -a
