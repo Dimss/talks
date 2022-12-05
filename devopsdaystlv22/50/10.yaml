@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gpu-test-2
+  name: gpu-test
 spec:
   selector:
     matchLabels:
-      app: gpu-test-2
+      app: gpu-test
   replicas: 2
   template:
     metadata:
       labels:
-        app: gpu-test-2
+        app: gpu-test
     spec:
       tolerations:
         - operator: "Exists"
