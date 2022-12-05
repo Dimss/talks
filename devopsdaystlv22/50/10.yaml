@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpu-test-2
+spec:
+  selector:
+    matchLabels:
+      app: gpu-test-2
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: gpu-test-2
+    spec:
+      tolerations:
+        - operator: "Exists"
+      containers:
+      - name: gpu-test
+        env:
+          - name: NVIDIA_VISIBLE_DEVICES
+            value: "0"
+        image: tensorflow/tensorflow:latest-gpu
+        command:
+          - /usr/local/bin/python
+          - -c
+          - |
+            import tensorflow as tf
+            import time
+            from datetime import datetime as dt
+            while True:
+               print(f"[{dt.now()}] {tf.config.list_physical_devices('GPU')}", flush=True)
+               time.sleep(1)
