@@ -15,30 +15,30 @@ import (
 	"time"
 )
 
-type RamPlugin struct {
+type FooBar struct {
 	server       *grpc.Server
 	socket       string
 	resourceName string
 }
 
-func (p *RamPlugin) GetDevicePluginOptions(ctx context.Context, empty *dp.Empty) (*dp.DevicePluginOptions, error) {
+func (b *FooBar) GetDevicePluginOptions(ctx context.Context, empty *dp.Empty) (*dp.DevicePluginOptions, error) {
 	return &dp.DevicePluginOptions{}, nil
 }
 
-func (p *RamPlugin) ListAndWatch(empty *dp.Empty, server dp.DevicePlugin_ListAndWatchServer) error {
+func (b *FooBar) ListAndWatch(empty *dp.Empty, server dp.DevicePlugin_ListAndWatchServer) error {
 
 	for {
 		devices := []*dp.Device{
 			{
-				ID:     "/mnt/disk1",
+				ID:     "foo",
 				Health: dp.Healthy,
 			},
 			{
-				ID:     "/mnt/disk2",
+				ID:     "bar",
 				Health: dp.Healthy,
 			},
 			{
-				ID:     "/mnt/disk3",
+				ID:     "baz",
 				Health: dp.Healthy,
 			},
 		}
@@ -50,11 +50,11 @@ func (p *RamPlugin) ListAndWatch(empty *dp.Empty, server dp.DevicePlugin_ListAnd
 	}
 }
 
-func (p *RamPlugin) GetPreferredAllocation(ctx context.Context, request *dp.PreferredAllocationRequest) (*dp.PreferredAllocationResponse, error) {
+func (b *FooBar) GetPreferredAllocation(ctx context.Context, request *dp.PreferredAllocationRequest) (*dp.PreferredAllocationResponse, error) {
 	return &dp.PreferredAllocationResponse{}, nil
 }
 
-func (p *RamPlugin) Allocate(ctx context.Context, request *dp.AllocateRequest) (*dp.AllocateResponse, error) {
+func (b *FooBar) Allocate(ctx context.Context, request *dp.AllocateRequest) (*dp.AllocateResponse, error) {
 	allocResponse := &dp.AllocateResponse{}
 	for _, req := range request.ContainerRequests {
 		containerResponse := &dp.ContainerAllocateResponse{}
@@ -70,22 +70,22 @@ func (p *RamPlugin) Allocate(ctx context.Context, request *dp.AllocateRequest) (
 	return allocResponse, nil
 }
 
-func (p *RamPlugin) PreStartContainer(ctx context.Context, request *dp.PreStartContainerRequest) (*dp.PreStartContainerResponse, error) {
+func (b *FooBar) PreStartContainer(ctx context.Context, request *dp.PreStartContainerRequest) (*dp.PreStartContainerResponse, error) {
 	return &dp.PreStartContainerResponse{}, nil
 }
 
-func (p *RamPlugin) Serve() error {
-	_ = os.Remove(p.socket)
+func (b *FooBar) Serve() error {
+	_ = os.Remove(b.socket)
 
-	dp.RegisterDevicePluginServer(p.server, p)
+	dp.RegisterDevicePluginServer(b.server, b)
 
-	sock, err := net.Listen("unix", p.socket)
+	sock, err := net.Listen("unix", b.socket)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		if err := p.server.Serve(sock); err != nil {
+		if err := b.server.Serve(sock); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -93,7 +93,7 @@ func (p *RamPlugin) Serve() error {
 	return nil
 }
 
-func (p *RamPlugin) Register() error {
+func (b *FooBar) Register() error {
 
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -113,8 +113,8 @@ func (p *RamPlugin) Register() error {
 
 	req := &dp.RegisterRequest{
 		Version:      dp.Version,
-		Endpoint:     path.Base(p.socket),
-		ResourceName: p.resourceName,
+		Endpoint:     path.Base(b.socket),
+		ResourceName: b.resourceName,
 		Options:      &dp.DevicePluginOptions{},
 	}
 
@@ -126,10 +126,10 @@ func (p *RamPlugin) Register() error {
 }
 
 func main() {
-	ramDisk := &RamPlugin{
+	ramDisk := &FooBar{
 		server:       grpc.NewServer(),
-		socket:       dp.DevicePluginPath + "ramdisk.sock",
-		resourceName: "cnvrg.io/ramdisk",
+		socket:       dp.DevicePluginPath + "foobar.sock",
+		resourceName: "cnvrg.io/foo-bar",
 	}
 	if err := ramDisk.Serve(); err != nil {
 		log.Fatal(err)
