@@ -1,16 +1,19 @@
 # create empty file
-dd if=/dev/zero of=/tmp/loopback.file bs=1M count=10
+LOOPBACK_FILE=loopback.file
+LOOPBACK_DIR=/tmp/loopback-devices
+mkdir -p ${LOOPBACK_FILE}
+dd if=/dev/zero of="${LOOPBACK_DIR}/${LOOPBACK_FILE}" bs=1M count=10
 
 # create virtual block device
-losetup -fP /tmp/loopback.file
+losetup -fP "${LOOPBACK_DIR}/${LOOPBACK_FILE}"
 losetup -a
 
 # format virtual block device
-mkfs.ext4 /tmp/loopback.file
+mkfs.ext4 "${LOOPBACK_DIR}/${LOOPBACK_FILE}"
 
 # mount as read only
-mkdir -p /mnt/{test1,test2}
-DEVICE_ID=$(losetup -a  | grep loopback.file | awk '{print $1}' | tr -d :)
+mkdir -p /mnt/{test1,test2,test3}
+DEVICE_ID=$(losetup -a  | grep ${LOOPBACK_FILE} | awk '{print $1}' | tr -d :)
 mount -o loop,ro "${DEVICE_ID}" /mnt/test1
 mount -o loop,ro "${DEVICE_ID}" /mnt/test2
 
