@@ -3,10 +3,12 @@ LOOPBACK_FILE=loopback.file
 LOOPBACK_DIR=/tmp/loopback-devices
 mkdir -p ${LOOPBACK_FILE}
 dd if=/dev/zero of="${LOOPBACK_DIR}/${LOOPBACK_FILE}" bs=1M count=10
+ls -allh ${LOOPBACK_DIR}
 
 # create virtual block device
 losetup -fP "${LOOPBACK_DIR}/${LOOPBACK_FILE}"
 losetup -a
+
 
 # format virtual block device
 mkfs.ext4 "${LOOPBACK_DIR}/${LOOPBACK_FILE}"

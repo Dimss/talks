@@ -1,1 +1,0 @@
-dd if=/dev/zero of=/tmp/loopback.file bs=1M count=10
