@@ -1,1 +1,0 @@
-ls -allh /dev

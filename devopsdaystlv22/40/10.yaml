@@ -1,32 +1,77 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gpu-test
+  name: dev-metagpu
+  namespace: debug-metagpu
 spec:
   selector:
     matchLabels:
-      app: gpu-test
-  replicas: 2
+      app: dev-metagpu
   template:
     metadata:
       labels:
-        app: gpu-test
+        app: dev-metagpu
     spec:
+      nodeSelector:
+        accelerator: nvidia
       tolerations:
-        - operator: "Exists"
+        - operator: Exists
+      hostPID: true
+      hostNetwork: true
+      serviceAccountName: metagpu-device-plugin
       containers:
-      - name: gpu-test
-        image: tensorflow/tensorflow:latest-gpu
-        command:
-          - /usr/local/bin/python
-          - -c
-          - |
-            import tensorflow as tf
-            import time
-            from datetime import datetime as dt
-            while True:
-               print(f"[{dt.now()}] {tf.config.list_physical_devices('GPU')}", flush=True)
-               time.sleep(1)
-        resources:
-          limits:
-            nvidia.com/gpu: "1"
+      - name: dev-metagpu
+        imagePullPolicy: Always
+        image: cnvrg/golang-cuda11-6-dvl:latest
+        ports:
+          - containerPort: 2345
+          - containerPort: 50052
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: device-plugin
+            mountPath: /var/lib/kubelet/device-plugins
+          - mountPath: /host/proc
+            mountPropagation: HostToContainer
+            name: proc
+            readOnly: true
+      volumes:
+        - name: device-plugin
+          hostPath:
+            path: /var/lib/kubelet/device-plugins
+        - hostPath:
+            path: /proc
+          name: proc
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: metagpu-device-plugin
+  namespace: debug-metagpu
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      - "*"
+    verbs:
+      - "*"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: metagpu-device-plugin
+  namespace: debug-metagpu
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: metagpu-device-plugin
+  namespace: debug-metagpu
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: metagpu-device-plugin
+subjects:
+  - kind: ServiceAccount
+    name: metagpu-device-plugin
+    namespace: debug-metagpu
