@@ -5,5 +5,5 @@ for c in gpu-1 gpu-2; do
    -d \
    -v $(pwd)/gpu-test.py:/tmp/gpu-test.py \
    tensorflow/tensorflow:latest-gpu \
-   python -c /tmp/gpu-test.py
+   python /tmp/gpu-test.py
 done
