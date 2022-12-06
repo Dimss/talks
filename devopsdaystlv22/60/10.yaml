@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dev-metagpu
-  namespace: default
+  namespace: debug-metagpu
 spec:
   selector:
     matchLabels:
@@ -43,59 +43,30 @@ spec:
             path: /proc
           name: proc
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: dev-metagpu
-  namespace: default
-spec:
-  ports:
-    - name: tcp
-      port: 2345
-  selector:
-    app: dev-metagpu
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: metagpu-device-plugin
-  namespace: default
+  namespace: debug-metagpu
 rules:
   - apiGroups:
-      - ""
+      - "*"
     resources:
-      - pods
+      - "*"
     verbs:
-      - list
-      - get
-      - create
-  - apiGroups:
-      - ""
-    resources:
-      - pods/exec
-    verbs:
-      - create
-  - apiGroups:
-      - ""
-    resources:
-      - configmaps
-    resourceNames:
-      - metagpu-device-plugin-config
-    verbs:
-      - get
-      - update
+      - "*"
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: metagpu-device-plugin
-  namespace: default
+  namespace: debug-metagpu
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: metagpu-device-plugin
-  namespace: default
+  namespace: debug-metagpu
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -103,4 +74,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: metagpu-device-plugin
-    namespace: default
+    namespace: debug-metagpu
