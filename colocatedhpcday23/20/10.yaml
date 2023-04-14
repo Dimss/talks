@@ -32,3 +32,14 @@ spec:
         resources:
           limits:
             nvidia.com/gpu: "1"
+        volumeMounts:
+        - name: lib
+          mountPath: /lib/hostlibs
+        env:
+          - name: LD_LIBRARY_PATH
+            value: /lib/hostlibs
+      volumes:
+      - name: lib
+        hostPath:
+          path: /lib/x86_64-linux-gnu/
+          type: Directory
