@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpu-test
+spec:
+  selector:
+    matchLabels:
+      app: gpu-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gpu-test
+    spec:
+      tolerations:
+        - operator: "Exists"
+      containers:
+      - name: gpu-test
+        image: tensorflow/tensorflow:latest-gpu
+        command:
+          - /usr/local/bin/python
+          - -c
+          - |
+            import tensorflow as tf
+            import time
+            from datetime import datetime as dt
+            gpus = tf.config.list_physical_devices('GPU')
+            tf.config.set_logical_device_configuration(gpus[0], [tf.config.LogicalDeviceConfiguration(memory_limit=2048)])
+            while True:
+               print(f"[{dt.now()}] {tf.constant([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])}", flush=True)
+               time.sleep(1)
+        resources:
+          limits:
+            nvidia.com/gpu: "1"
