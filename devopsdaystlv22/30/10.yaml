@@ -18,7 +18,7 @@ spec:
       - name: gpu-test
         env:
           - name: NVIDIA_VISIBLE_DEVICES
-            value: "0"
+            value: "0,1,3"
         image: tensorflow/tensorflow:latest-gpu
         command:
           - /usr/local/bin/python
