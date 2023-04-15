@@ -114,7 +114,7 @@ spec:
             model.fit(x_train, y_train, epochs=10000)
         resources:
           limits:
-            cnvrg.io/metagpu: "30"
+            cnvrg.io/metagpu: "20"
         volumeMounts:
         - name: lib
           mountPath: /lib/hostlibs
